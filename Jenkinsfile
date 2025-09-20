@@ -9,8 +9,7 @@ pipeline {
     }
 
     tools {
-        nodejs "Node18"          // Jenkins → Global Tool Configuration
-        sonarScanner "SonarScanner"
+        nodejs "Node18"    // Jenkins → Global Tool Configuration
     }
 
     stages {
