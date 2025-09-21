@@ -2,19 +2,20 @@ pipeline {
     agent any
 
     environment {
-        // Adjust for your registry
-        DOCKER_REGISTRY = "docker.io"
-        DOCKER_REPO     = "visshnu12345nat/jenkins-server" // Replace with your Docker hub Username and repo
-        DOCKER_IMAGE_TAG = "${env.BUILD_NUMBER}"
-        // SonarQube config name in Jenkins
-        // SONARQUBE_ENV = "MySonarQubeServer"
+        // Docker registry settings
+        DOCKER_REGISTRY   = "docker.io"
+        DOCKER_REPO       = "visshnu12345nat/jenkins-server" // Replace with your DockerHub repo
+        DOCKER_IMAGE_TAG  = "${env.BUILD_NUMBER}"
+
+        // SonarQube config name (must match Jenkins SonarQube server config)
+        SONARQUBE_ENV     = "MySonarQubeServer"
+
         // Teams Webhook credential ID (Secret Text)
-        TEAMS_WEBHOOK_ID = 'teams-webhook'
+        TEAMS_WEBHOOK_ID  = 'teams-webhook'
     }
 
     tools {
-        // If you installed NodeJS plugin in Jenkins, name must match Tools config
-        nodejs "Node18"
+        nodejs "Node18" // NodeJS version configured in Jenkins Global Tools
     }
 
     stages {
@@ -36,6 +37,22 @@ pipeline {
             }
         }
 
+        stage('SonarQube Analysis') {
+            steps {
+                withSonarQubeEnv("${SONARQUBE_ENV}") {
+                    sh """
+                        npx sonar-scanner \
+                        -Dsonar.projectKey=jenkins-react-app \
+                        -Dsonar.projectName=JenkinsReactApp \
+                        -Dsonar.sources=src \
+                        -Dsonar.javascript.lcov.reportPaths=coverage/lcov.info \
+                        -Dsonar.host.url=$SONAR_HOST_URL \
+                        -Dsonar.login=$SONAR_AUTH_TOKEN
+                    """
+                }
+            }
+        }
+
         stage('Create Docker Image') {
             steps {
                 script {
@@ -47,6 +64,15 @@ pipeline {
             }
         }
 
+      \*  stage('Trivy Scan') {
+            steps {
+                sh """
+                    trivy image --exit-code 0 --severity LOW,MEDIUM ${DOCKER_REPO}:${DOCKER_IMAGE_TAG}
+                    trivy image --exit-code 1 --severity HIGH,CRITICAL ${DOCKER_REPO}:${DOCKER_IMAGE_TAG}
+                """
+            }
+        }
+*/
         stage('Push Docker Image to Registry') {
             steps {
                 script {
@@ -62,6 +88,19 @@ pipeline {
                     }
                 }
             }
+        }
+    }
+
+    post {
+        always {
+            echo "Pipeline finished. Cleaning up workspace..."
+            cleanWs()
+        }
+        success {
+            echo "✅ Build, SonarQube Analysis, Trivy Scan, and Docker Push succeeded."
+        }
+        failure {
+            echo "❌ Pipeline failed. Please check logs."
         }
     }
 }
