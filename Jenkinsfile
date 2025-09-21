@@ -41,12 +41,9 @@ pipeline {
             steps {
                 withSonarQubeEnv("${SONARQUBE_ENV}") {
                     sh """
-                      export NODE_OPTIONS="--max-old-space-size=4096"
-                      npx sonar-scanner \
                         -Dsonar.projectKey=jenkins-react-app \
                         -Dsonar.projectName=JenkinsReactApp \
                         -Dsonar.sources=src \
-                        -Dsonar.javascript.lcov.reportPaths=coverage/lcov.info \
                         -Dsonar.host.url=http://13.211.175.170:9000 \
                         -Dsonar.token=$SONAR_AUTH_TOKEN
                     """
