@@ -41,7 +41,8 @@ pipeline {
             steps {
                 withSonarQubeEnv("${SONARQUBE_ENV}") {
                     sh """
-                        npx sonar-scanner \
+                      export NODE_OPTIONS="--max-old-space-size=4096"
+                      npx sonar-scanner \
                         -Dsonar.projectKey=jenkins-react-app \
                         -Dsonar.projectName=JenkinsReactApp \
                         -Dsonar.sources=src \
