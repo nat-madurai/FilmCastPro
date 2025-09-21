@@ -47,8 +47,8 @@ pipeline {
                         -Dsonar.projectName=JenkinsReactApp \
                         -Dsonar.sources=src \
                         -Dsonar.javascript.lcov.reportPaths=coverage/lcov.info \
-                        -Dsonar.host.url=http://43.220.4.41:9000 \
-                        -Dsonar.login=$SONAR_AUTH_TOKEN
+                        -Dsonar.host.url=http://13.211.175.170:9000 \
+                        -Dsonar.token=$SONAR_AUTH_TOKEN
                     """
                 }
             }
