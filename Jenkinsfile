@@ -52,7 +52,6 @@ pipeline {
                 }
             }
         }
-
         stage('Create Docker Image') {
             steps {
                 script {
@@ -64,15 +63,6 @@ pipeline {
             }
         }
 
-      \*  stage('Trivy Scan') {
-            steps {
-                sh """
-                    trivy image --exit-code 0 --severity LOW,MEDIUM ${DOCKER_REPO}:${DOCKER_IMAGE_TAG}
-                    trivy image --exit-code 1 --severity HIGH,CRITICAL ${DOCKER_REPO}:${DOCKER_IMAGE_TAG}
-                """
-            }
-        }
-*/
         stage('Push Docker Image to Registry') {
             steps {
                 script {
