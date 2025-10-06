@@ -2,20 +2,16 @@ pipeline {
     agent any
 
     environment {
-        // Docker registry settings
         DOCKER_REGISTRY   = "docker.io"
-        DOCKER_REPO       = "visshnu12345nat/jenkins-server" // Replace with your DockerHub repo
+        DOCKER_REPO       = "visshnu12345nat/jenkins-server"
         DOCKER_IMAGE_TAG  = "${env.BUILD_NUMBER}"
 
-        // SonarQube config name (must match Jenkins SonarQube server config)
         SONARQUBE_ENV     = "MySonarQubeServer"
-
-        // Teams Webhook credential ID (Secret Text)
         TEAMS_WEBHOOK_ID  = 'teams-webhook'
     }
 
     tools {
-        nodejs "Node18" // NodeJS version configured in Jenkins Global Tools
+        nodejs "Node18"
     }
 
     stages {
@@ -40,16 +36,18 @@ pipeline {
         stage('SonarQube Analysis') {
             steps {
                 withSonarQubeEnv("${SONARQUBE_ENV}") {
-                    sh """
+                    sh '''
+                        sonar-scanner \
                         -Dsonar.projectKey=jenkins-react-app \
                         -Dsonar.projectName=JenkinsReactApp \
                         -Dsonar.sources=src \
                         -Dsonar.host.url=http://13.211.175.170:9000 \
                         -Dsonar.token=$SONAR_AUTH_TOKEN
-                    """
+                    '''
                 }
             }
         }
+
         stage('Create Docker Image') {
             steps {
                 script {
@@ -60,6 +58,7 @@ pipeline {
                 }
             }
         }
+
         stage('Trivy Scan') {
             steps {
                 sh """
@@ -68,6 +67,7 @@ pipeline {
                 """
             }
         }
+
         stage('Push Docker Image to Registry') {
             steps {
                 script {
